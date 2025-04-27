@@ -56,8 +56,8 @@ export default function NewAgentPage() {
         throw new Error('Failed to create agent')
       }
 
-      // Redirect to the agents page
-      router.push("/agents")
+      // Redirect to the agents page with refresh parameter
+      router.push("/agents?refresh=true")
     } catch (error) {
       console.error('Error creating agent:', error)
       // In a real app, you would show an error message to the user

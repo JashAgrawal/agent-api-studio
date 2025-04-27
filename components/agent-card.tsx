@@ -11,9 +11,10 @@ interface AgentCardProps {
     createdAt: string
     conversationCount: number
   }
+  onRefresh?: () => void
 }
 
-export function AgentCard({ agent }: AgentCardProps) {
+export function AgentCard({ agent, onRefresh }: AgentCardProps) {
   return (
     <Card>
       <CardHeader>

@@ -54,7 +54,7 @@ export default function AgentSettingsPage({ params }: { params: Promise<{ id: st
   // Fetch agent details
   useEffect(() => {
     if (!agentId) return
-    
+
     const fetchAgent = async () => {
       setIsLoading(true)
       try {
@@ -71,7 +71,7 @@ export default function AgentSettingsPage({ params }: { params: Promise<{ id: st
         setIsLoading(false)
       }
     }
-    
+
     fetchAgent()
   }, [agentId])
 
@@ -91,7 +91,7 @@ export default function AgentSettingsPage({ params }: { params: Promise<{ id: st
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!agentId) return
-    
+
     setIsSaving(true)
     try {
       const response = await fetch(`/api/agents/${agentId}`, {
@@ -101,13 +101,14 @@ export default function AgentSettingsPage({ params }: { params: Promise<{ id: st
         },
         body: JSON.stringify(formData),
       })
-      
+
       if (!response.ok) {
         throw new Error('Failed to update agent')
       }
-      
+
       // Show success message or redirect
-      router.push('/agents')
+      // Add a query parameter to trigger a refresh
+      router.push('/agents?refresh=true')
     } catch (error) {
       console.error('Error updating agent:', error)
       // In a real app, you would show an error message to the user
@@ -118,19 +119,19 @@ export default function AgentSettingsPage({ params }: { params: Promise<{ id: st
 
   const handleDelete = async () => {
     if (!agentId) return
-    
+
     setIsDeleting(true)
     try {
       const response = await fetch(`/api/agents/${agentId}`, {
         method: 'DELETE',
       })
-      
+
       if (!response.ok) {
         throw new Error('Failed to delete agent')
       }
-      
-      // Redirect to agents page
-      router.push('/agents')
+
+      // Redirect to agents page with refresh parameter
+      router.push('/agents?refresh=true')
     } catch (error) {
       console.error('Error deleting agent:', error)
       // In a real app, you would show an error message to the user

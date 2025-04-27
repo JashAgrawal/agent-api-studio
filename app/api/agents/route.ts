@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma"
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    
+
     // Validate required fields
     if (!body.name || !body.systemInstruction) {
       return NextResponse.json(
@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       )
     }
-    
+
     // Create the agent in the database
     const agent = await prisma.agent.create({
       data: {
@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
         apiEnabled: body.apiEnabled !== undefined ? body.apiEnabled : true,
       },
     })
-    
+
     return NextResponse.json(agent, { status: 201 })
   } catch (error) {
     console.error("Error creating agent:", error)
@@ -50,8 +50,24 @@ export async function GET() {
         createdAt: 'desc',
       },
     })
-    
-    return NextResponse.json(agents)
+
+    // Transform the data to match the expected format
+    const formattedAgents = agents.map(agent => ({
+      id: agent.id,
+      name: agent.name,
+      description: agent.description || "",
+      createdAt: agent.createdAt.toISOString(),
+      conversationCount: agent._count.conversations,
+    }))
+
+    // Set cache control headers to prevent caching
+    return NextResponse.json(formattedAgents, {
+      headers: {
+        'Cache-Control': 'no-store, max-age=0, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0'
+      }
+    })
   } catch (error) {
     console.error("Error fetching agents:", error)
     return NextResponse.json(
