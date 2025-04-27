@@ -63,13 +63,8 @@ export function MainHeader() {
             className="flex items-center gap-1 text-muted-foreground hover:text-foreground"
             onClick={async () => {
               try {
-                // Call the logout API
-                await fetch("/api/auth/logout", {
-                  method: "POST",
-                });
-
-                // Update client-side auth state
-                logout();
+                // Update client-side auth state and call the logout API
+                await logout();
 
                 toast.success("Logged out successfully");
                 router.push("/login");

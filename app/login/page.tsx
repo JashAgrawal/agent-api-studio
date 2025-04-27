@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,7 +10,8 @@ import { useAuth } from "@/lib/auth-context";
 import { toast } from "sonner";
 import { Lock } from "lucide-react";
 
-export default function LoginPage() {
+// Component that uses searchParams
+function LoginForm() {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
@@ -30,19 +31,10 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
-      // Client-side validation
-      const success = login(password);
+      // Client-side validation through API
+      const success = await login(password);
 
       if (success) {
-        // Also set a cookie for server-side validation
-        await fetch("/api/auth/login", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ password }),
-        });
-
         toast.success("Login successful");
         router.push(from);
       } else {
@@ -91,5 +83,18 @@ export default function LoginPage() {
         </form>
       </Card>
     </div>
+  );
+}
+
+// Main page component with Suspense boundary
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex items-center justify-center min-h-screen">
+        <p>Loading...</p>
+      </div>
+    }>
+      <LoginForm />
+    </Suspense>
   );
 }

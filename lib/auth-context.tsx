@@ -4,8 +4,8 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 
 type AuthContextType = {
   isAuthenticated: boolean;
-  login: (password: string) => boolean;
-  logout: () => void;
+  login: (password: string) => Promise<boolean>;
+  logout: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -21,20 +21,46 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  const login = (password: string): boolean => {
-    // This is a client-side check only
-    // The actual security is enforced by the middleware
-    if (password === process.env.NEXT_PUBLIC_APP_SECRET_KEY) {
-      setIsAuthenticated(true);
-      localStorage.setItem("auth-status", "authenticated");
-      return true;
+  const login = async (password: string): Promise<boolean> => {
+    try {
+      // Send the password to the server for validation
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ password }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setIsAuthenticated(true);
+        localStorage.setItem("auth-status", "authenticated");
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error("Login error:", error);
+      return false;
     }
-    return false;
   };
 
-  const logout = () => {
-    setIsAuthenticated(false);
-    localStorage.removeItem("auth-status");
+  const logout = async (): Promise<void> => {
+    try {
+      // Call the logout API
+      await fetch("/api/auth/logout", {
+        method: "POST",
+      });
+
+      setIsAuthenticated(false);
+      localStorage.removeItem("auth-status");
+    } catch (error) {
+      console.error("Logout error:", error);
+      // Still remove local auth even if API call fails
+      setIsAuthenticated(false);
+      localStorage.removeItem("auth-status");
+    }
   };
 
   return (
