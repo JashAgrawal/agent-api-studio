@@ -3,6 +3,7 @@ import './globals.css'
 import { MainHeader } from '@/components/layouts/main-header'
 import { Toaster } from '@/components/ui/sonner'
 import { ThemeProvider } from '@/components/theme-provider'
+import { AuthProvider } from '@/lib/auth-context'
 
 export const metadata: Metadata = {
   title: 'AI Agent Studio',
@@ -18,11 +19,13 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className="min-h-screen bg-background font-sans antialiased">
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <MainHeader />
-          <main className="flex-1">
-            {children}
-          </main>
-          <Toaster />
+          <AuthProvider>
+            <MainHeader />
+            <main className="flex-1">
+              {children}
+            </main>
+            <Toaster />
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>
