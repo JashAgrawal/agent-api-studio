@@ -90,7 +90,7 @@ export async function generateGeminiText({
 
   // Create a chat session
   const chat = genAI.chats.create({
-    model: 'gemini-1.5-pro',
+    model: 'gemini-2.0-flash',
     config: {
       systemInstruction: system,
       temperature,
@@ -180,7 +180,7 @@ export async function streamGeminiText({
 }) {
   // Create a chat session
   const chat = genAI.chats.create({
-    model: 'gemini-1.5-pro',
+    model: 'gemini-2.0-flash',
     config: {
       systemInstruction: system,
       temperature,
