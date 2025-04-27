@@ -15,6 +15,7 @@ import { PageLayout } from "@/components/layouts/page-layout"
 import { toast } from "sonner"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
+import { Textarea } from "@/components/ui/textarea"
 
 interface Message {
   id: string
@@ -478,7 +479,8 @@ export default function AgentChatPage({ params }: { params: Promise<{ id: string
             </div>
             <form onSubmit={handleSubmit} className="flex gap-2">
               <div className="flex-1 flex gap-2">
-                <Input
+                <Textarea
+                  rows={2}
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   placeholder={isLoading || isThinking ? "Waiting for response..." : "Type your message..."}
