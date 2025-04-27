@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent } from "@/components/ui/card"
 import { Avatar } from "@/components/ui/avatar"
-import { Send, ArrowLeft, History, Loader2 } from "lucide-react"
+import { Send, ArrowLeft, History, Loader2, Copy, Check } from "lucide-react"
 import { UploadButton } from "@/lib/uploadThingUtils"
 import { PageLayout } from "@/components/layouts/page-layout"
 import { toast } from "sonner"
@@ -44,6 +44,7 @@ export default function AgentChatPage({ params }: { params: Promise<{ id: string
   const [fileName, setFileName] = useState<string | null>(null)
   const [conversationId, setConversationId] = useState<string | null>(null)
   const [isLoadingHistory, setIsLoadingHistory] = useState(false)
+  const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   // Get URL search params
@@ -308,8 +309,40 @@ export default function AgentChatPage({ params }: { params: Promise<{ id: string
                       <div
                         className={`rounded-lg p-3 ${
                           message.role === "user" ? "bg-primary text-primary-foreground" : "bg-muted"
-                        } ${message.isThinking ? "animate-pulse" : ""} w-full overflow-hidden break-words`}
+                        } ${message.isThinking ? "animate-pulse" : ""} w-full overflow-hidden break-words relative group`}
                       >
+                        {/* Copy button for assistant messages */}
+                        {message.role === "assistant" && !message.isThinking && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="absolute top-2 right-2 h-6 w-6 rounded-full bg-background/80 opacity-0 group-hover:opacity-100 transition-opacity shadow-sm hover:bg-background"
+                            onClick={() => {
+                              navigator.clipboard.writeText(message.content)
+                                .then(() => {
+                                  setCopiedMessageId(message.id);
+                                  toast.success("Message copied to clipboard");
+
+                                  // Reset the copied state after 2 seconds
+                                  setTimeout(() => {
+                                    setCopiedMessageId(null);
+                                  }, 2000);
+                                })
+                                .catch(err => {
+                                  console.error("Failed to copy message:", err);
+                                  toast.error("Failed to copy message");
+                                });
+                            }}
+                            title="Copy message"
+                          >
+                            {copiedMessageId === message.id ? (
+                              <Check className="h-3 w-3" />
+                            ) : (
+                              <Copy className="h-3 w-3" />
+                            )}
+                          </Button>
+                        )}
+
                         {message.role === "assistant" && !message.isThinking ? (
                           <div className="prose prose-sm dark:prose-invert w-full overflow-hidden">
                             <ReactMarkdown
@@ -360,12 +393,16 @@ export default function AgentChatPage({ params }: { params: Promise<{ id: string
 
                         <div className="flex items-center justify-between mt-1">
                           <p className="text-xs opacity-70">{message.timestamp.toLocaleTimeString()}</p>
-                          {message.isThinking && (
-                            <div className="flex items-center mx-2">
-                              <Loader2 className="h-3 w-3 animate-spin mr-1" />
-                              <span className="text-xs">Thinking...</span>
-                            </div>
-                          )}
+                          <div className="flex items-center gap-2">
+                            {message.isThinking && (
+                              <div className="flex items-center mx-2">
+                                <Loader2 className="h-3 w-3 animate-spin mr-1" />
+                                <span className="text-xs">Thinking...</span>
+                              </div>
+                            )}
+
+                            {/* Copy button is now positioned in the top-right corner */}
+                          </div>
                         </div>
                       </div>
                     </div>
